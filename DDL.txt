@@ -1,0 +1,143 @@
+create schema Airforce;
+set search_path to Airforce;
+
+create table Unit(
+unitname varchar(100),
+unittype varchar(100),
+DOE date,
+Primary key (unitname,unittype) 
+);
+
+create table Course(
+courseid varchar(100),
+coursename varchar(100),
+year char(4),
+Primary key (courseid,year)
+
+);
+
+create table Soldier(
+sid int ,
+sname varchar(100),
+rank varchar(100),
+DOB date,
+DOC date,
+DOR date,
+courseid varchar(100),
+year char(4),
+unitname Varchar(100),
+unittype varchar(100),
+remark varchar(100),
+contactno char(100),
+gender char(10),
+addressline varchar(100),
+city varchar(100),
+"state" varchar(100),
+pincode char(6),
+maritalstatus varchar(100),
+emergencycontact char(10),
+Primary key (sid),
+Foreign key (courseid, year) references Course(courseid, year)
+	on update cascade , 
+Foreign key (unitname, unittype) references Unit(unitname, unittype)
+	on update cascade 
+);
+
+
+Create table Medicalinformation(
+sid int,
+identificationmark varchar(100),
+fitnesslevel int,
+	check (fitnesslevel >0 AND fitnesslevel<=5),
+height int,
+weight decimal(5,2),
+bloodgroup varchar(100),
+allergies varchar(100),
+checkupdate date,
+primary key(sid,checkupdate),
+Foreign key (sid) references Soldier(sid)
+	on update cascade on delete cascade
+);
+create table Dependents(
+name varchar(100),
+sid int,
+DOB date,
+gender char(10),
+relationship varchar(100),
+primary key (name,sid),
+Foreign key (sid) references Soldier(sid)
+	on update cascade on delete cascade
+);
+
+Create table Awards(
+sid int,
+awardName varchar(100),
+Primary key(sid,awardname),
+	
+Foreign key (sid) references Soldier(sid)
+	on update cascade on delete cascade
+);
+
+Create table Base
+(
+geographicalcoordinate varchar(100),
+station varchar(100),
+state varchar(100),
+primary key (geographicalcoordinate)
+
+);
+
+create table Aircraft(
+serialno int,
+variant varchar(100),
+previousid int,
+aircraftstatus varchar(100),
+TOC_date date,
+SOC_date date,
+geographicalcoordinate varchar(100),
+Primary key (serialno),
+Foreign key (geographicalcoordinate) references Base(geographicalcoordinate)
+	on update cascade 
+);
+
+create table Mission(
+missionid int,
+name varchar(100),
+location varchar(100),
+dateofcommencement date,
+missionhead int ,
+dateofcompletion date,
+Primary key (missionid),
+Foreign key (missionhead) references Soldier(sid)
+	on update cascade
+);
+
+create table Missionassigned(
+mid int,
+sid int,
+Primary key (mid,sid),
+Foreign key (mid) references Mission(missionid)
+	on update cascade,
+Foreign key (sid) references Soldier(sid)
+	on update cascade on delete cascade 
+);
+
+create table Stationedat(
+unitname varchar(100),
+unittype varchar(100),
+geographicalcoordinate varchar(100),
+Primary key (unitname,unittype,geographicalcoordinate),
+Foreign key (geographicalcoordinate) references Base(geographicalcoordinate)
+	on update cascade on delete cascade,
+Foreign key (unitname, unittype) references Unit(unitname, unittype)
+	on update cascade on delete cascade
+);
+
+create table Assignedaircraft(
+mid int,
+serialno int,
+Primary key (mid,serialno),
+Foreign key (mid) references Mission(missionid)
+	on update cascade on delete cascade,
+Foreign key (serialno) references Aircraft(serialno)
+	on update cascade);

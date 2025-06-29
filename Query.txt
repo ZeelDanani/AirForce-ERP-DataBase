@@ -1,0 +1,82 @@
+--1 List sid, sname of all Group Captains.
+SELECT sid,sname,"rank" 
+FROM soldier
+WHERE "rank" ='Group Captain';
+
+--2 find the total number of missions each soldier has been assigned to lead, along with their ranks and names, sorted in descending order of the mission count. 
+SELECT s.sid, s.rank, s.sname, COUNT(m.missionid) AS mission_count
+FROM Soldier s
+LEFT JOIN Mission m ON s.sid = m.missionhead
+GROUP BY s.sid, s.rank, s.sname
+ORDER BY mission_count DESC;
+
+--3  list all the units which are working at a particular station.
+SELECT b.station, s.unitname, s.unittype, b.geographicalcoordinate
+FROM Base b
+natural JOIN Stationedat s order by b.station;
+
+--4 list all soldiers who have received the 'Vayu Sena Medal'.
+SELECT s.sid, s.sname
+FROM Soldier s
+JOIN Awards a ON s.sid = a.sid
+WHERE a.awardname = 'Vayu Sena Medal';
+
+--5 List name of soldier'sname and sid who have O- blood group.
+SELECT DISTINCT s.sname,s.sid 
+FROM medicalinformation AS m 
+NATURAL JOIN soldier AS s 
+WHERE m.bloodgroup = 'O-';
+
+--6 Count number of soldiers for every bloodgroup.
+SELECT bloodgroup, count(sid)
+FROM (select distinct sid, bloodgroup from medicalinformation) as s group by bloodgroup;
+
+--7  Display the details of all aircraft with the status 'Inactive', including their serial numbers, variants, and the dates they were transferred into custody (TOC date).
+SELECT serialno, variant, TOC_date
+FROM Aircraft
+WHERE aircraftstatus = 'Inactive';
+
+--8 List soldier name, sid who has worked for missionid= '529'.
+SELECT s.sname, s.sid, ma.mid
+FROM Soldier as s
+JOIN Missionassigned as ma ON s.sid = ma.sid
+WHERE ma.mid = 529;
+
+
+--9  list the mission name and the soldiers who worked for each mission.
+SELECT Mission.name AS mission_name, mission.missionid, soldier.sname as soldier_name, soldier.sid  
+FROM Mission
+JOIN Missionassigned ON Mission.missionid = Missionassigned.mid
+JOIN Soldier ON Missionassigned.sid = Soldier.sid;
+
+--10  List all missions headed by soldier id =199101
+select m.missionhead,m.name,s.sname from mission as m join soldier as s on m.missionhead=s.sid 
+where sid=199101;
+
+--11 List all the soldiers who have headed more than 1 mission 
+select m.missionhead,count(m.name) from mission as m  group by m.missionhead 
+having count(m.name)>1;
+
+--12 which is the most used aircraft ?
+select a.variant from aircraft as a natural join assignedaircraft as aa group by (a.variant) order by count(a.variant) desc limit 1;
+
+--13 Give the name and id of soldier who is working in flying unit and whose fitnesslevel is more than 2 on last ckeckup date 
+SELECT s.sid, s.sname FROM Soldier AS s JOIN MedicalInformation AS mi ON s.sid = mi.sid WHERE mi.checkupdate = (SELECT MAX(checkupdate) FROM MedicalInformation WHERE sid = s.sid) AND mi.fitnesslevel > 2 AND unittype = 'flying'
+
+--14 List all soldier whose last checkup date is earlier than DDMMYY
+SELECT s.sid, s.sname FROM Soldier AS s JOIN MedicalInformation AS mi ON s.sid = mi.sid WHERE mi.checkupdate = (SELECT MAX(checkupdate) FROM MedicalInformation WHERE sid = s.sid) AND mi.checkupdate < '2002-04-04';
+
+--15 List all soldier who have resigned before their retirement
+select s.sid, s.sname from soldier as s where s.remark = 'resigned';
+
+--16 List all soldiers who have served for country more than 15 years
+select s.sid, s.sname from soldier as s where (s.dor IS NULL AND ('2024-04-4' - s.doc) > 15) OR (s.doc - s.dor) > 15; 
+
+--17 State wise count of  bases  in ascending order.
+SELECT b.state, COUNT(b.station)  FROM base AS b group BY b.state ORDER BY COUNT(b.station);
+
+--18 Number of aircraft of any variant having aircraft status 'Active'.
+SELECT a.variant, count(a.serialno)
+FROM aircraft AS a
+WHERE a.aircraftstatus = 'Active'
+GROUP BY a.variant;
